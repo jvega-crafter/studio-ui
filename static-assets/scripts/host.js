@@ -202,12 +202,17 @@
     hasCheckIn = true;
 
     if (message.url) {
+      console.log('url', message.url);
+
       var params = {
         page: message.url,
         site: CStudioAuthoring.Utils.Cookies.readCookie('crafterSite')
       };
 
-      var studioPath = CrafterCMSNext.util.path.getPathFromPreviewURL(message.url);
+      // getPathFromPreviewURL only works for pages, added '/post/' validation as a test for components
+      var studioPath = message.url.includes('/post/')
+        ? '/site/components' + message.url + '.xml'
+        : CrafterCMSNext.util.path.getPathFromPreviewURL(message.url);
 
       setHash(params);
       amplify.publish(cstopic('GUEST_SITE_LOAD'), params);
@@ -225,8 +230,16 @@
 
   communicator.subscribe(Topics.GUEST_SITE_URL_CHANGE, function (message, scope) {
     if (message.url) {
-      var site = CStudioAuthoring.Utils.Cookies.readCookie('crafterSite'),
-        studioPath = CStudioAuthoring.ComponentsPanel.getPreviewPagePath(message.url);
+      var site = CStudioAuthoring.Utils.Cookies.readCookie('crafterSite');
+        // studioPath = CStudioAuthoring.ComponentsPanel.getPreviewPagePath(message.url);
+
+      // getPathFromPreviewURL only works for pages, added '/post/' validation as a test for components
+      var studioPath = message.url.includes('/post/')
+        ? '/site/components' + message.url + '.xml'
+        : CrafterCMSNext.util.path.getPathFromPreviewURL(message.url);
+
+      console.log('studioPath', studioPath);
+
       selectStudioContent(site, studioPath);
 
       setHash({ page: message.url, site });
@@ -634,10 +647,11 @@
   function selectStudioContent(site, url) {
     CStudioAuthoring.Service.lookupContentItem(site, url, {
       success: function (content) {
-        if (content.item.isPage) {
+        // commented page validation for testing purposes (for components)
+        // if (content.item.isPage) {
           CStudioAuthoring.SelectedContent.setContent(content.item);
           selectContentSet(content.item, true);
-        }
+        // }
       }
     });
   }

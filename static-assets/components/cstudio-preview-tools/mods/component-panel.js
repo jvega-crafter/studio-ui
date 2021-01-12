@@ -366,6 +366,9 @@
 
         init: function () {
           //clean params from currentPath
+
+          // this is where the dnd gets the model
+
           var previewCurrentPath = CStudioAuthoringContext.previewCurrentPath;
 
           CStudioAuthoring.ComponentsPanel.getPageModel(
